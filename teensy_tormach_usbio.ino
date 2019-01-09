@@ -1,7 +1,24 @@
 
+//  define ON_ARDUINO to 1 to make work with Arduino Uno
+#define ON_ARDUINO 0
+#if !ON_ARDUINO
 #define USE_TOUCH 1
 #define TOUCH_DELTA 300
+#endif
 
+#if ON_ARDUINO
+#define INPUT0 A0
+#define INPUT1 A1
+#define INPUT2 A2
+#define INPUT3 A3
+
+#define OUTPUT0 2
+#define OUTPUT1 3
+#define OUTPUT2 4
+#define OUTPUT3 5
+
+#define MSG_PIN 13
+#else
 #define INPUT0 15
 #define INPUT1 16
 #define INPUT2 17
@@ -13,6 +30,8 @@
 #define OUTPUT3 23
 
 #define MSG_PIN 13
+#endif
+
 
 #define VERSION_STR "Teensy for Tormach I/O ID=0\n"
 #define DEBOUNCE_MS 10
@@ -27,6 +46,7 @@ bool tInputs[4];
 //  time to use for de-bounce
 uint32_t tmInputs[4];
 
+#if USE_TOUCH
 class TouchPin {
   public:
   TouchPin(uint8_t pin) : pin_(pin), on_(false), low_(800), high_(1300), last_(500) {
@@ -77,8 +97,12 @@ TouchPin touchPin0(INPUT0);
 TouchPin touchPin1(INPUT1);
 TouchPin touchPin2(INPUT2);
 TouchPin touchPin3(INPUT3);
+#endif
 
 void setup() {
+#if ON_ARDUINO
+  Serial.begin(38400);
+#endif
   // put your setup code here, to run once:
   pinMode(OUTPUT0, OUTPUT);
   digitalWrite(OUTPUT0, LOW);
@@ -142,9 +166,15 @@ void loop() {
         } else if (inbuf[0] == '?') {
           inbuf[iptr] = 0;
           char buf[120];
+#if ON_ARDUINO
+          sprintf(buf, "* %d%d%d%d %d%d%d%d\n",
+            outputs[0], outputs[1], outputs[2], outputs[3],
+            inputs[0], inputs[1], inputs[2], inputs[3]);
+#else
           sprintf(buf, "* %s %s %s %s %d%d%d%d\n",
             touchPin0.fmt(), touchPin1.fmt(), touchPin2.fmt(), touchPin3.fmt(),
             inputs[0], inputs[1], inputs[2], inputs[3]);
+#endif
           Serial.write(buf);
         } else {
           //  bad CMD!!
