@@ -28,6 +28,8 @@ void setup() {
   // put your setup code here, to run once:
   pinMode(OUTPUT0, OUTPUT);
   digitalWrite(OUTPUT0, LOW);
+  pinMode(MSG_PIN, OUTPUT);
+  digitalWrite(MSG_PIN, LOW);
 }
 
 char inbuf[256];
